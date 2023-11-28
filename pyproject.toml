@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cd_cli"
+description = "Command line access to comdirect."
+
+readme = "README.md"
+license = {file = "LICENSE"}
+
+version = "2023.11.28a1"
+
+requires-python = ">=3.8"
+
+dependencies = [
+    "requests",
+    "coloredlogs",
+    "babel" 
+]
+
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"
+]
+
+[project.scripts]
+comdi-cli = "cd_cli.main:main"
+
+[project.urls]
+Repository = "https://github.com/ExploracuriousAlex/comdi-cli.git"
+Issues = "https://github.com/ExploracuriousAlex/comdi-cli/issues"
