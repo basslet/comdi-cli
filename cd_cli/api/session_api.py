@@ -83,6 +83,14 @@ class SessionApi:
         self._logger.debug("Client Request-ID: %s", ret)
         return ret
 
+    def base_headers(self):
+        return {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.tokens.access_token}",
+            "x-http-request-info": self.create_client_request_id(),
+        }
+
     def tokens_valid(self, scope=None):
         """
         Check if tokens are valid.
@@ -338,12 +346,8 @@ class SessionApi:
         client_id = "user"
         url = self.base_url + f"/session/clients/{client_id}/v1/sessions"
 
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.tokens.access_token}",
-            "x-http-request-info": self.create_client_request_id(),
-        }
+        headers = self.base_headers()
+
         response = requests.get(url=url, headers=headers, timeout=self.requests_timeout)
 
         self._logger.debug("Response: %s", response.text)
@@ -397,12 +401,9 @@ class SessionApi:
             + f"/session/clients/{client_id}/v1/sessions/{session_id}/validate"
         )
         self._logger.debug(url)
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.tokens.access_token}",
-            "x-http-request-info": self.create_client_request_id(),
-        }
+
+        headers = self.base_headers()
+
         data = json.dumps(
             {
                 "identifier": session_id,
@@ -472,15 +473,12 @@ class SessionApi:
         session_id = self.session.identifier
         url = self.base_url + f"/session/clients/{client_id}/v1/sessions/{session_id}"
 
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.tokens.access_token}",
-            "x-http-request-info": self.create_client_request_id(),
-            "x-once-authentication-info": json.dumps(
-                {"id": f"{self.authentication_info.authentication_info_id}"}
-            ),
-        }
+        headers = self.base_headers()
+
+        headers["x-once-authentication-info"] = json.dumps(
+            {"id": f"{self.authentication_info.authentication_info_id}"}
+        )
+
         if tan is not None:
             headers["x-once-authentication"] = f"{tan}"
 

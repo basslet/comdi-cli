@@ -34,12 +34,8 @@ class BankingApi:
             + f"/banking/clients/{client_id}/v2/accounts/balances"
         )
 
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self._session.tokens.access_token}",
-            "x-http-request-info": self._session.create_client_request_id(),
-        }
+        headers = self._session.base_headers()
+
         response = requests.get(
             url=url, headers=headers, timeout=self._session.requests_timeout
         )
@@ -87,12 +83,7 @@ class BankingApi:
 
         url = self._session.base_url + f"/banking/v1/accounts/{account_id}/transactions"
 
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self._session.tokens.access_token}",
-            "x-http-request-info": self._session.create_client_request_id(),
-        }
+        headers = self._session.base_headers()
 
         # 500 is max (as of 2023/11/27)
         # if this is not sufficient anymore, check what can be done with paging-first und paging-count parameters
