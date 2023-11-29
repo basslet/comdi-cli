@@ -9,14 +9,15 @@ description = "Command line access to comdirect."
 readme = "README.md"
 license = {file = "LICENSE"}
 
-version = "2023.11.28a1"
+version = "2023.11.29a1"
 
 requires-python = ">=3.8"
 
 dependencies = [
     "requests",
     "coloredlogs",
-    "babel" 
+    "babel",
+    "pathvalidate"
 ]
 
 classifiers = [

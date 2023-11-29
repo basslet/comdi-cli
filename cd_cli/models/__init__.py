@@ -3,7 +3,7 @@ from cd_cli.models.account import Account
 from cd_cli.models.account_balance import AccountBalance
 from cd_cli.models.account_information import AccountInformation
 from cd_cli.models.account_transaction import AccountTransaction
-from cd_cli.models.account_transaction_aggregate import AccountTransactionAggregate
+from cd_cli.models.account_transactions_aggregate import AccountTransactionsAggregate
 from cd_cli.models.aggregated_info import AggregatedInfo
 from cd_cli.models.amount_value import AmountValue
 from cd_cli.models.authentication_info import AuthenticationInfo
@@ -25,18 +25,17 @@ from cd_cli.models.derivative_data import DerivativeData
 from cd_cli.models.dimensions import Dimensions
 from cd_cli.models.document import Document
 from cd_cli.models.document_metadata import DocumentMetadata
+from cd_cli.models.documents_aggregate import DocumentsAggregate
 from cd_cli.models.enum_text import EnumText
 from cd_cli.models.execution import Execution
-from cd_cli.models.fx_rate_eur import FXRateEUR
 from cd_cli.models.fixed_term_savings import FixedTermSavings
 from cd_cli.models.fund_distribution import FundDistribution
+from cd_cli.models.fx_rate_eur import FXRateEUR
 from cd_cli.models.inducement import Inducement
 from cd_cli.models.installment_loan import InstallmentLoan
 from cd_cli.models.installment_loan_balance import InstallmentLoanBalance
 from cd_cli.models.instrument import Instrument
-from cd_cli.models.list_resource_account_balance import (
-    ListResourceAccountBalance,
-)
+from cd_cli.models.list_resource_account_balance import ListResourceAccountBalance
 from cd_cli.models.list_resource_account_transaction import (
     ListResourceAccountTransaction,
 )
@@ -45,16 +44,12 @@ from cd_cli.models.list_resource_cost_indication_ex_ante import (
 )
 from cd_cli.models.list_resource_depot import ListResourceDepot
 from cd_cli.models.list_resource_depot_position import ListResourceDepotPosition
-from cd_cli.models.list_resource_depot_transaction import (
-    ListResourceDepotTransaction,
-)
+from cd_cli.models.list_resource_depot_transaction import ListResourceDepotTransaction
 from cd_cli.models.list_resource_dimensions import ListResourceDimensions
 from cd_cli.models.list_resource_document import ListResourceDocument
 from cd_cli.models.list_resource_instrument import ListResourceInstrument
 from cd_cli.models.list_resource_order import ListResourceOrder
-from cd_cli.models.list_resource_product_balance import (
-    ListResourceProductBalance,
-)
+from cd_cli.models.list_resource_product_balance import ListResourceProductBalance
 from cd_cli.models.order import Order
 from cd_cli.models.order_type import OrderType
 from cd_cli.models.paging_info import PagingInfo

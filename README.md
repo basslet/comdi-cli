@@ -2,9 +2,7 @@
 
 Comdi-cli is an implementation in Python to retrieve account information, transactions and documents via the comdirect REST API.
 
-The initial implementation allows to retrieve account transactions.
-
-The download of documents is planned for the next version.
+The program allows to retrieve account transactions and to download all PDF documents.
 
 It is a hobby project that combines the pleasant with the useful. So I can learn a little Python and also retrieve account transactions including the mandate reference. (Unfortunately, the corresponding CSV export on the comdirect website does not include mandate references.)
 

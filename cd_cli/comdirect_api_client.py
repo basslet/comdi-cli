@@ -1,6 +1,6 @@
 import base64
 
-from cd_cli.api import SessionApi, BankingApi
+from cd_cli.api import SessionApi, BankingApi, MessagesApi
 from cd_cli.utils import get_colored_logger
 
 
@@ -18,6 +18,7 @@ class ComdirectApiClient(object):
         self.session = None
         self.requests_timeout = requests_timeout
         self.banking = None
+        self.messages = None
 
     def login(self):
         if self.session is not None:
@@ -83,3 +84,21 @@ class ComdirectApiClient(object):
         print()
         print(self.banking.get_account_transactions)
         print()
+
+    def get_document_list(self, **kwargs):
+        if self.messages is not None:
+            self._logger.debug("MessagesAPI object exitsts. Skip instantiation.")
+        else:
+            cd_messages = MessagesApi(self.session)
+            self.messages = cd_messages
+
+        self.messages.get_document_list(**kwargs)
+
+    def get_document(self, document):
+        if self.messages is not None:
+            self._logger.debug("MessagesAPI object exitsts. Skip instantiation.")
+        else:
+            cd_messages = MessagesApi(self.session)
+            self.messages = cd_messages
+
+        return self.messages.get_document(document)

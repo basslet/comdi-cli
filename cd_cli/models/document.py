@@ -105,14 +105,14 @@ class Document(object):
         :param name: The name of this Document.
         :type: str
         """
-        if name is not None and len(name) > 50:
-            raise ValueError(
-                "Invalid value for `name`, length must be less than or equal to `50`"
-            )
-        if name is not None and len(name) < 0:
-            raise ValueError(
-                "Invalid value for `name`, length must be greater than or equal to `0`"
-            )
+        # if name is not None and len(name) > 50:
+        #     raise ValueError(
+        #         "Invalid value for `name`, length must be less than or equal to `50`"
+        #     )
+        # if name is not None and len(name) < 0:
+        #     raise ValueError(
+        #         "Invalid value for `name`, length must be greater than or equal to `0`"
+        #     )
 
         self._name = name
 

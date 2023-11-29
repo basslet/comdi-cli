@@ -1,7 +1,7 @@
 import pprint
 
 
-class AccountTransactionAggregate(object):
+class AccountTransactionsAggregate(object):
     # Attributes:
     #   attribute_types (dict): The key is attribute name
     #                           and the value is attribute type.
@@ -30,13 +30,15 @@ class AccountTransactionAggregate(object):
         account=None,
         account_id=None,
         booking_date_latest_transaction=None,
+        reference_latest_transaction=None,
         latest_transaction_included=None,
         paging_timestamp=None,
     ):
-        """AccountTransactionAggregate"""
+        """AccountTransactionsAggregate"""
         self._account = None
         self._account_id = None
         self._booking_date_latest_transaction = None
+        self._reference_latest_transaction = None
         self._latest_transaction_included = None
         self._paging_timestamp = None
 
@@ -46,6 +48,8 @@ class AccountTransactionAggregate(object):
             self.account_id = account_id
         if booking_date_latest_transaction is not None:
             self.booking_date_latest_transaction = booking_date_latest_transaction
+        if reference_latest_transaction is not None:
+            self.reference_latest_transaction = reference_latest_transaction
         if latest_transaction_included is not None:
             self.latest_transaction_included = latest_transaction_included
         if paging_timestamp is not None:
@@ -74,6 +78,14 @@ class AccountTransactionAggregate(object):
     @booking_date_latest_transaction.setter
     def booking_date_latest_transaction(self, booking_date_latest_transaction):
         self._booking_date_latest_transaction = booking_date_latest_transaction
+
+    @property
+    def reference_latest_transaction(self):
+        return self._reference_latest_transaction
+
+    @reference_latest_transaction.setter
+    def reference_latest_transaction(self, reference_latest_transaction):
+        self._reference_latest_transaction = reference_latest_transaction
 
     @property
     def latest_transaction_included(self):
@@ -114,7 +126,7 @@ class AccountTransactionAggregate(object):
                 )
             else:
                 result[attr] = value
-        if issubclass(AccountTransactionAggregate, dict):
+        if issubclass(AccountTransactionsAggregate, dict):
             for key, value in self.items():
                 result[key] = value
 
@@ -130,14 +142,14 @@ class AccountTransactionAggregate(object):
 
     def __eq__(self, other):
         """Returns true if both objects are equal"""
-        if not isinstance(other, AccountTransactionAggregate):
+        if not isinstance(other, AccountTransactionsAggregate):
             return False
 
         return self.to_dict() == other.to_dict()
 
     def __ne__(self, other):
         """Returns true if both objects are not equal"""
-        if not isinstance(other, AccountTransactionAggregate):
+        if not isinstance(other, AccountTransactionsAggregate):
             return True
 
         return self.to_dict() != other.to_dict()

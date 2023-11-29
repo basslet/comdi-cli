@@ -1,7 +1,9 @@
 import json
+import os
 from datetime import datetime, timedelta
 
 from babel.numbers import format_currency
+from pathvalidate import sanitize_filename
 
 from cd_cli.comdirect_api_client import ComdirectApiClient
 from cd_cli.utils import get_colored_logger
@@ -71,7 +73,7 @@ def main():
         )
 
     account_transactions = client.banking.account_transactions
-    
+
     print()
     print("Direct debit bookings:")
     print(f"{"Date":<10} {"Amount":>12} {"Receipient":<80} {"Mandate reference"}")
@@ -79,13 +81,35 @@ def main():
         transaction_type = transaction.transaction_type.key
         if transaction_type != "DIRECT_DEBIT":
             continue
-    
+
         booking_date = str(transaction.booking_date)
         amount = format_currency(transaction.amount.value,transaction.amount.unit, locale="de_DE")
         recepient = transaction.remitter.holder_name
         mandate = transaction.direct_debit_mandate_id
 
         print(f"{booking_date:<10} {amount:>12} {recepient:<80.80} {mandate}")
+
+    document_list = []
+    first_page = 0
+    total_matches = 0
+    while True:
+        client.get_document_list(paging_first = first_page)
+        document_list += client.messages.document_list.values
+        # index = client.messages.document_list.paging.index
+        matches = client.messages.document_list.paging.matches
+        matches_in_response = client.messages.document_list.aggregated.matches_in_this_response
+        total_matches +=   matches_in_response
+        if total_matches == matches:
+            break
+        first_page += matches_in_response
+
+    doc_dir = "documents"
+    os.makedirs(doc_dir,exist_ok=True)
+    for document in document_list:
+        if document.mime_type == "application/pdf":
+            file_name = f"{doc_dir}/"+sanitize_filename(f"{document.date_creation} {document.name}.pdf", platform="universal")
+            with open(file_name, "wb") as file:
+                file.write(client.get_document(document))
 
     client.logout()
 

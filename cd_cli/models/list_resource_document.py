@@ -9,7 +9,7 @@ class ListResourceDocument(object):
     #                           and the value is json key in definition.
     attribute_types = {
         "paging": "PagingInfo",
-        "aggregated": "AggregatedInfo",
+        "aggregated": "DocumentsAggregate",
         "values": "list[Document]",
     }
 
