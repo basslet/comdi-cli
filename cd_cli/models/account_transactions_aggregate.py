@@ -100,7 +100,7 @@ class AccountTransactionsAggregate(object):
         return self._paging_timestamp
 
     @paging_timestamp.setter
-    def reference(self, paging_timestamp):
+    def paging_timestamp(self, paging_timestamp):
         self._paging_timestamp = paging_timestamp
 
     def to_dict(self):
