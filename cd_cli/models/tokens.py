@@ -51,7 +51,6 @@ class Tokens(object):
         self._kdnr = None
         self._bpid = None
         self._kontakt_id = None
-        # absolute utc expiration date time, not part of the response
         self._expires = None
 
         if access_token is not None:
@@ -185,7 +184,7 @@ class Tokens(object):
         :type: str
         """
 
-        self._expires = datetime.utcnow() + timedelta(seconds=expires_in)
+        self._expires = datetime.now() + timedelta(seconds=expires_in)
 
     @property
     def scope(self):

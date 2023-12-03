@@ -1,6 +1,7 @@
 import json
 import uuid
 from datetime import datetime
+from time import sleep
 
 import requests
 
@@ -10,21 +11,32 @@ from cd_cli.models import StandardErrorResponse, Tokens, Session, Authentication
 
 
 class SessionApi:
-    def __init__(self, apiclient):
+    def __init__(self, client_id, client_secret, username, password):
         self._logger = get_colored_logger(__name__)
-        self._client_id = apiclient.client_id
-        self._client_secret = apiclient.client_secret
-        self._username = apiclient.username
-        self._password = apiclient.password
-        self.base_url = apiclient.base_url
-        self._oauth_url = apiclient.oauth_url
-        self.requests_timeout = apiclient.requests_timeout
+        self._client_id = client_id
+        self._client_secret = client_secret
+        self._username = username
+        self._password = password
+
+        self._oauth_url = "https://api.comdirect.de"
+        self.base_url = "https://api.comdirect.de/api"
+
+        self._session_timeout = 300
+        self.requests_timeout = 30
 
         self.session_id = self._create_session_id()
 
         self.tokens = None
         self.session = None
         self.authentication_info = None
+
+    def _request_limiter(self):
+        """
+        Limit the API requests.
+
+        The comdirect REST API allows 10 requests per second.
+        """
+        sleep(0.1)
 
     def _create_session_id(self):
         """
@@ -104,23 +116,33 @@ class SessionApi:
             bool: Validity of the tokens.
         """
         if self.tokens is None:
-            self._logger.debug("Cannot check validity since no tokens are available.")
-            return False
-        current_utc_time = datetime.utcnow()
-        expire_in_seconds = round(
-            (self.tokens.expires - current_utc_time).total_seconds()
-        )
-        if expire_in_seconds <= 0:
-            self._logger.debug("Tokens expired %ss ago.", abs(expire_in_seconds))
-            return False
-        if scope is not None and scope not in self.tokens.scope:
             self._logger.debug(
-                'Required access right "%s" is not in scope of tokens (%s).',
-                scope,
-                self.tokens.scope,
+                "Cannot check validity of tokens since no tokens are available."
             )
             return False
-        self._logger.debug("Takens are valid. They expire in %ss.", expire_in_seconds)
+        current_time = datetime.now()
+        expire_in_seconds = round((self.tokens.expires - current_time).total_seconds())
+        if expire_in_seconds <= 0:
+            self._logger.critical("Tokens expired %ss ago.", abs(expire_in_seconds))
+            return False
+        if expire_in_seconds <= 60:
+            self.refresh_tokens(skip_check=True)
+        if scope is not None:
+            valid_scope = False
+            for s in scope:
+                if s in self.tokens.scope:
+                    valid_scope = True
+                    break
+
+            if valid_scope is False:
+                self._logger.critical(
+                    "Required access right(s) (%s) not in scope of tokens (%s).",
+                    ", ".join(scope),
+                    self.tokens.scope,
+                )
+                return False
+
+        self._logger.debug("Tokens are valid. They expire in %ss.", expire_in_seconds)
         return True
 
     def request_tokens_using_password(self):
@@ -145,6 +167,7 @@ class SessionApi:
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded",
         }
+        self._request_limiter()
         response = requests.post(
             url=url, data=data, headers=headers, timeout=self.requests_timeout
         )
@@ -200,6 +223,7 @@ class SessionApi:
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded",
         }
+        self._request_limiter()
         response = requests.post(
             url=url, data=data, headers=headers, timeout=self.requests_timeout
         )
@@ -222,6 +246,7 @@ class SessionApi:
             self.tokens = tokens
             self._logger.info("Tokens were successfully retrieved.")
             self._logger.debug("Object: %s", tokens)
+            self._logger.info("You are fully logged in.")
             return
 
         self._logger.critical(
@@ -229,13 +254,14 @@ class SessionApi:
             response.status_code,
         )
 
-    def refresh_tokens(self):
+    def refresh_tokens(self, skip_check=False):
         """
         Refresh OAuth2 tokens.
         """
-        if not self.tokens_valid():
-            self._logger.warning("No valid tokens. Refresh not possible.")
-            return
+        if not skip_check:
+            if not self.tokens_valid():
+                self._logger.warning("No valid tokens. Refresh not possible.")
+                return
 
         url = self._oauth_url + "/oauth/token"
         data = {
@@ -248,6 +274,7 @@ class SessionApi:
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded",
         }
+        self._request_limiter()
         response = requests.post(
             url=url, data=data, headers=headers, timeout=self.requests_timeout
         )
@@ -297,6 +324,7 @@ class SessionApi:
             "Content-Type": "application/x-www-form-urlencoded",
             "Authorization": f"Bearer {self.tokens.access_token}",
         }
+        self._request_limiter()
         response = requests.delete(
             url=url, headers=headers, timeout=self.requests_timeout
         )
@@ -348,6 +376,7 @@ class SessionApi:
 
         headers = self.base_headers()
 
+        self._request_limiter()
         response = requests.get(url=url, headers=headers, timeout=self.requests_timeout)
 
         self._logger.debug("Response: %s", response.text)
@@ -411,6 +440,8 @@ class SessionApi:
                 "activated2FA": "True",
             }
         )
+
+        self._request_limiter()
         response = requests.post(
             url=url, headers=headers, data=data, timeout=self.requests_timeout
         )
@@ -489,6 +520,7 @@ class SessionApi:
                 "activated2FA": "true",
             }
         )
+        self._request_limiter()
         response = requests.patch(
             url=url, headers=headers, data=data, timeout=self.requests_timeout
         )
@@ -521,3 +553,70 @@ class SessionApi:
             response.json()["error"] or "n.a.",
             response.json()["error_description"] or "n.a.",
         )
+
+    def comdirect_get(
+        self,
+        path,
+        object_type,
+        additional_params=None,
+        additional_headers=None,
+        scope=None,
+    ):
+        """
+        Send a get request to comdirect REST API.
+        """
+
+        if scope is not None:
+            if not self.tokens_valid(scope=scope):
+                return None, None
+        else:
+            if not self.tokens_valid():
+                return None, None
+
+        url = self.base_url + path
+
+        headers = self.base_headers()
+        if additional_headers is not None:
+            headers.update(additional_headers)
+
+        params = {}
+        if additional_params is not None:
+            params.update(additional_params)
+
+        self._request_limiter()
+        response = requests.get(
+            url=url,
+            headers=headers,
+            params=params,
+            timeout=self.requests_timeout,
+        )
+
+        if "x-http-response-info" in response.headers:
+            standard_error_response = deserialize(
+                json.loads(response.headers["x-http-response-info"]),
+                StandardErrorResponse,
+            )
+
+            for message in standard_error_response.messages:
+                if message.severity == "INFO":
+                    self._logger.debug(
+                        "%s: %s - %s", message.severity, message.key, message.message
+                    )
+                else:
+                    self._logger.warning(
+                        "%s: %s - %s", message.severity, message.key, message.message
+                    )
+
+        # self._logger.debug("Response: %s", response.text)
+
+        if response.status_code == 200:
+            if object_type is None:
+                return response.content, response.text
+            else:
+                obj = deserialize(response, object_type)
+                return obj, response.json()
+
+        self._logger.critical(
+            "Request failed with tatus code %s.", response.status_code
+        )
+        return None, None

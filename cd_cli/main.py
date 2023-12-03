@@ -10,7 +10,7 @@ from cd_cli.utils import get_colored_logger
 
 
 def main():
-    logger = get_colored_logger(__name__, verbosity="debug")
+    logger = get_colored_logger(__name__, verbosity="info")
 
     credentials = {}
     credentials_file = "credentials.json"
@@ -53,26 +53,23 @@ def main():
         credentials["password"],
     )
     client.login()
-    client.get_account_balances()
-    account_id = client.banking.account_balances.values[0].account.account_id
+    account_balances, _ = client.get_account_balances()
+    account_id = account_balances.values[0].account.account_id
 
-    start_date = datetime.utcnow() - timedelta(days=730)
-    client.get_account_transactions(account_id, start_date=start_date)
+    start_date = datetime.now() - timedelta(days=730)
+    account_transactions, account_transactions_json = client.get_account_transactions(account_id, start_date=start_date, paging_count=500)
 
-    account_transactions_raw = client.banking.raw_responses["account_transactions"]
-
-    filename = "account_transactions_raw.json"
+    os.makedirs(f"output/{account_id}",exist_ok=True)
+    filename = f"output/{account_id}/account_transactions.json"
 
     try:
         logger.debug('Try saving account transactions (raw) to "%s".', filename)
         with open(filename, "w", encoding="utf-8") as file:
-            file.write(json.dumps(account_transactions_raw))
+            file.write(json.dumps(account_transactions_json))
     except Exception:
         logger.warning(
             'Could not save account transactions (raw) to "%s".', filename, exc_info=1
         )
-
-    account_transactions = client.banking.account_transactions
 
     print()
     print("Direct debit bookings:")
@@ -93,17 +90,17 @@ def main():
     first_page = 0
     total_matches = 0
     while True:
-        client.get_document_list(paging_first = first_page)
-        document_list += client.messages.document_list.values
-        # index = client.messages.document_list.paging.index
-        matches = client.messages.document_list.paging.matches
-        matches_in_response = client.messages.document_list.aggregated.matches_in_this_response
+        doc_list = client.get_document_list(paging_first = first_page)
+        document_list += doc_list.values
+        # index = doc_list.paging.index
+        matches = doc_list.paging.matches
+        matches_in_response = doc_list.aggregated.matches_in_this_response
         total_matches +=   matches_in_response
         if total_matches == matches:
             break
         first_page += matches_in_response
 
-    doc_dir = "documents"
+    doc_dir = f"output/{account_id}/documents"
     os.makedirs(doc_dir,exist_ok=True)
     for document in document_list:
         if document.mime_type == "application/pdf":

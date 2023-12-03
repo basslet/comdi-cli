@@ -9,7 +9,7 @@ description = "Command line access to comdirect."
 readme = "README.md"
 license = {file = "LICENSE"}
 
-version = "2023.11.29a3"
+version = "2023.12.03a2"
 
 requires-python = ">=3.8"
 

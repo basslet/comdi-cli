@@ -1,4 +1,5 @@
 import pprint
+import html
 
 
 class BusinessMessage(object):
@@ -12,7 +13,7 @@ class BusinessMessage(object):
         "severity": "str",
         "message": "str",
         "origin": "list[str]",
-        "args": "list[object]",
+        "args": "object",
     }
 
     attribute_map = {
@@ -63,7 +64,12 @@ class BusinessMessage(object):
         :param key: The key of this BusinessMessage.
         :type: str
         """
-        allowed_values = ["request.object.invalid", "request.query.invalid", "expired"]
+        allowed_values = [
+            "request.object.invalid",
+            "request.query.invalid",
+            "expired",
+            "paging.invalid",
+        ]
         if key not in allowed_values:
             raise ValueError(
                 "Invalid value for `key` ({0}), must be one of {1}".format(
@@ -222,3 +228,9 @@ class BusinessMessage(object):
             return True
 
         return self.to_dict() != other.to_dict()
+
+    def message_string(self):
+        text = html.unescape(self.message)
+        if self.args is not None:
+            text = text.format(*self.args.values())
+        return f"{self.severity}: {self.key} - {text}"
