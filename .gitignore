@@ -161,7 +161,7 @@ cython_debug/
 
 .DS_Store
 
-credentials.json
+credentials.json*
 account_transactions_raw.json
 output/
 

@@ -9,7 +9,7 @@ description = "Command line access to comdirect."
 readme = "README.md"
 license = {file = "LICENSE"}
 
-version = "2023.12.03a2"
+version = "2023.12.09a1"
 
 requires-python = ">=3.8"
 
@@ -32,3 +32,6 @@ comdi-cli = "cd_cli.main:main"
 [project.urls]
 Repository = "https://github.com/ExploracuriousAlex/comdi-cli.git"
 Issues = "https://github.com/ExploracuriousAlex/comdi-cli/issues"
+
+[tool.setuptools]
+packages = ["cd_cli"]

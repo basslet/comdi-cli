@@ -28,7 +28,7 @@ def main():
     required_keys = ["client_id", "client_secret", "username", "password"]
 
     for key in required_keys:
-        if  key not in credentials:
+        if key not in credentials:
             credentials_were_incomplete = True
             credentials[key] = input(f'Please enter "{key}": ')
 
@@ -57,9 +57,11 @@ def main():
     account_id = account_balances.values[0].account.account_id
 
     start_date = datetime.now() - timedelta(days=730)
-    account_transactions, account_transactions_json = client.get_account_transactions(account_id, start_date=start_date, paging_count=500)
+    account_transactions, account_transactions_json = client.get_account_transactions(
+        account_id, start_date=start_date, paging_count=500
+    )
 
-    os.makedirs(f"output/{account_id}",exist_ok=True)
+    os.makedirs(f"output/{account_id}", exist_ok=True)
     filename = f"output/{account_id}/account_transactions.json"
 
     try:
@@ -73,14 +75,16 @@ def main():
 
     print()
     print("Direct debit bookings:")
-    print(f"{"Date":<10} {"Amount":>12} {"Receipient":<80} {"Mandate reference"}")
+    print(f'{"Date":<10} {"Amount":>12} {"Receipient":<80} {"Mandate reference"}')
     for transaction in account_transactions.values:
         transaction_type = transaction.transaction_type.key
         if transaction_type != "DIRECT_DEBIT":
             continue
 
         booking_date = str(transaction.booking_date)
-        amount = format_currency(transaction.amount.value,transaction.amount.unit, locale="de_DE")
+        amount = format_currency(
+            transaction.amount.value, transaction.amount.unit, locale="de_DE"
+        )
         recepient = transaction.remitter.holder_name
         mandate = transaction.direct_debit_mandate_id
 
@@ -90,25 +94,37 @@ def main():
     first_page = 0
     total_matches = 0
     while True:
-        doc_list = client.get_document_list(paging_first = first_page)
+        doc_list = client.get_document_list(paging_first=first_page)
         document_list += doc_list.values
         # index = doc_list.paging.index
         matches = doc_list.paging.matches
         matches_in_response = doc_list.aggregated.matches_in_this_response
-        total_matches +=   matches_in_response
+        total_matches += matches_in_response
         if total_matches == matches:
             break
         first_page += matches_in_response
 
-    doc_dir = f"output/{account_id}/documents"
-    os.makedirs(doc_dir,exist_ok=True)
+    doc_dir = f"output/{account_id}/documents/"
+
     for document in document_list:
         if document.mime_type == "application/pdf":
-            file_name = f"{doc_dir}/"+sanitize_filename(f"{document.date_creation} {document.name}.pdf", platform="universal")
-            with open(file_name, "wb") as file:
+            file_name = sanitize_filename(
+                f"{document.date_creation} {document.name}.pdf", platform="universal"
+            )
+            if "Wertpapierabrechnung" in document.name:
+                path = f"{doc_dir}Wertpapierabrechnung/"
+            elif "Ertragsgutschrift" in document.name:
+                path = f"{doc_dir}Ertragsgutschrift/"
+            else:
+                path = f"{doc_dir}"
+
+            os.makedirs(path, exist_ok=True)
+            with open(path + file_name, "wb") as file:
                 file.write(client.get_document(document))
+                logger.info('Saved "%s".', file_name)
 
     client.logout()
+
 
 if __name__ == "__main__":
     main()
