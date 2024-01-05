@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from datetime import datetime, timedelta
 
 from babel.numbers import format_currency
@@ -14,6 +15,8 @@ def main():
 
     credentials = {}
     credentials_file = "credentials.json"
+    if len(sys.argv) > 1:
+        credentials_file += f"_{sys.argv[1]}"
     credentials_were_incomplete = False
 
     try:
@@ -118,10 +121,11 @@ def main():
             else:
                 path = f"{doc_dir}"
 
-            os.makedirs(path, exist_ok=True)
-            with open(path + file_name, "wb") as file:
-                file.write(client.get_document(document))
-                logger.info('Saved "%s".', file_name)
+            if not os.path.exists(path + file_name):
+                os.makedirs(path, exist_ok=True)
+                with open(path + file_name, "wb") as file:
+                    file.write(client.get_document(document))
+                    logger.info('Saved "%s".', file_name)
 
     client.logout()
 
