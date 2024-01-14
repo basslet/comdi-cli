@@ -1,6 +1,6 @@
 import base64
 
-from cd_cli.api import SessionApi, BankingApi, MessagesApi
+from cd_cli.api import BankingApi, MessagesApi, SessionApi
 from cd_cli.utils import get_colored_logger
 
 

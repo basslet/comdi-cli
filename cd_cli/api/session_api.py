@@ -10,7 +10,7 @@ from cd_cli.deserialize import deserialize
 from cd_cli.models import StandardErrorResponse, Tokens, Session, AuthenticationInfo
 
 
-class SessionApi:
+class SessionApi(object):
     def __init__(self, client_id, client_secret, username, password):
         self._logger = get_colored_logger(__name__)
         self._client_id = client_id

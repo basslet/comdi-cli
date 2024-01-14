@@ -2,7 +2,7 @@ from cd_cli.models import ListResourceDocument
 from cd_cli.utils import get_colored_logger
 
 
-class MessagesApi:
+class MessagesApi(object):
     def __init__(self, session):
         self._logger = get_colored_logger(__name__)
         self._session = session
