@@ -1,4 +1,4 @@
-# comdi-cli: Command line access to comdirect.
+# comdi-cli: command line access to comdirect
 
 Comdi-cli is an implementation in Python to retrieve account information, transactions and documents via the comdirect REST API.
 
@@ -23,6 +23,7 @@ pip install .
 ## Usage
 
 Run:
+
 ```sh
 comdi-cli
 ```
@@ -31,12 +32,12 @@ If you put a 'credentials.json' file in the comdi-cli folder, comdi-cli will use
 
 The file format is:
 
-```
+```text
 {
-	"client_id": „YOUR_CLIENT_ID",
-	"client_secret": "YOUR_CLIENT_SECRET",
-	"username": "YOUR_USERNAME",
-	"password": "YOUR_PASSWORD"
+    "client_id": „YOUR_CLIENT_ID",
+    "client_secret": "YOUR_CLIENT_SECRET",
+    "username": "YOUR_USERNAME",
+    "password": "YOUR_PASSWORD"
 }
 ```
 
@@ -45,12 +46,27 @@ You will also have the option to save your entered credantials as 'credentials.j
 
 The credentials are only sent to comdirect for authentication purposes. Never anywhere else!
 
-## Important notes:
+## Further possible usages
+
+```sh
+comdi-cli tim
+```
+
+Will use credentials.json_tim as credentials file.
+
+```sh
+comdi-cli tim /my/own/folder
+```
+
+Will use credentials.json_tim as credentials file if and store the documents in /my/own/folder instead of output.
+If the path does not exist, output will be used.
+
+## Important notes
 
 - Registration is required to use the API and, accordingly, this program!
-   
+
   Please visit this website:
   
-  https://www.comdirect.de/cms/kontakt-zugaenge-api.html
-
+  [comdirect REST API | comdirect.de](https://www.comdirect.de/cms/kontakt-zugaenge-api.html)
+  
 - The implementation is prepared for different TAN procedures, but so far **only the authorization via push function of the photoTAN app has been tested!**

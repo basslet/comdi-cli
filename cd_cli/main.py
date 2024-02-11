@@ -19,6 +19,11 @@ def main():
         credentials_file += f"_{sys.argv[1]}"
     credentials_were_incomplete = False
 
+    output_dir = "output"
+    if len(sys.argv) > 2:
+        if os.path.exists(sys.argv[2]):
+            output_dir = sys.argv[2]
+
     try:
         logger.debug('Try reading credentials from "%s" file.', credentials_file)
         with open(credentials_file, "r", encoding="utf-8") as file:
@@ -64,8 +69,8 @@ def main():
         account_id, start_date=start_date, paging_count=500
     )
 
-    os.makedirs(f"output/{account_id}", exist_ok=True)
-    filename = f"output/{account_id}/account_transactions.json"
+    os.makedirs(f"{output_dir}/{account_id}", exist_ok=True)
+    filename = f"{output_dir}/{account_id}/account_transactions.json"
 
     try:
         logger.debug('Try saving account transactions (raw) to "%s".', filename)
@@ -107,7 +112,7 @@ def main():
             break
         first_page += matches_in_response
 
-    doc_dir = f"output/{account_id}/documents/"
+    doc_dir = f"{output_dir}/{account_id}/documents/"
 
     for document in document_list:
         if document.mime_type == "application/pdf":
