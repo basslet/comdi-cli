@@ -164,4 +164,4 @@ cython_debug/
 credentials.json*
 account_transactions_raw.json
 output/
-
+batch.*
