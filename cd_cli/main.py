@@ -21,8 +21,13 @@ def main():
 
     output_dir = "output"
     if len(sys.argv) > 2:
-        if os.path.exists(sys.argv[2]):
+        if os.path.isdir(sys.argv[2]):
             output_dir = sys.argv[2]
+        else:
+            logger.warning(
+                'Output directory "%s" does not exist. Local folder "output" is used instead.',
+                sys.argv[2],
+            )
 
     try:
         logger.debug('Try reading credentials from "%s" file.', credentials_file)
@@ -126,7 +131,7 @@ def main():
             else:
                 path = f"{doc_dir}"
 
-            if not os.path.exists(path + file_name):
+            if not os.path.isfile(path + file_name):
                 os.makedirs(path, exist_ok=True)
                 with open(path + file_name, "wb") as file:
                     file.write(client.get_document(document))
